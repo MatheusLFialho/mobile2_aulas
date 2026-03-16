@@ -5,6 +5,7 @@ import '../viewmodel/aula_acessibilidade_view_model.dart';
 import 'aula1_contador_page.dart';
 import 'aula_acessibilidade_page.dart';
 import 'aula_entrada_permissoes_page.dart';
+import 'aula_mapas_geolocalizacao_page.dart';
 
 // =============================================================================
 // MENU DE AULAS — View (MVVM)
@@ -87,6 +88,19 @@ class MenuPage extends StatelessWidget {
               context,
               const AulaEntradaPermissoesPage(),
               'Entrada e Permissões',
+            ),
+          ),
+          const Divider(),
+          ListTile(
+            title: const Text('Aula 1.5 — Mapas e geolocalização'),
+            subtitle: const Text(
+              'Flutter Web: mapa OSM, geolocator, marcador na posição',
+            ),
+            leading: const CircleAvatar(child: Icon(Icons.map)),
+            onTap: () => _abrirAula(
+              context,
+              const AulaMapasGeolocalizacaoPage(),
+              'Mapas e geolocalização',
             ),
           ),
         ],

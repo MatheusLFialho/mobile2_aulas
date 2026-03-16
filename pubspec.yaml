@@ -36,6 +36,11 @@ dependencies:
   cupertino_icons: ^1.0.8
   permission_handler: ^11.3.1
   geolocator: ^13.0.2
+  # Mapas (OpenStreetMap) — funciona no Flutter Web sem API key
+  flutter_map: ^8.0.0
+  latlong2: ^0.9.0
+  # Chamada à API OSRM para obter geometria da rota entre dois pontos
+  http: ^1.2.0
 
 dev_dependencies:
   flutter_test:
