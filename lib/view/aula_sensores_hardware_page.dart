@@ -3,33 +3,32 @@ import 'package:flutter/material.dart';
 import '../viewmodel/aula_sensores_hardware_view_model.dart';
 
 // =============================================================================
-// AULA 1.4 — SENSORES DE HARDWARE (View em MVVM) — VERSÃO EXERCÍCIO
+// AULA 1.4 — SENSORES DE HARDWARE (View em MVVM)
 // =============================================================================
-// Objetivo: ler acelerômetro, giroscópio e GPS na mesma tela.
-// Partes essenciais da integração com ViewModel estão marcadas com TODO.
+// Exibe leituras de acelerômetro, giroscópio e GPS. O ViewModel gerencia
+// streams e permissões; a View apenas reage ao estado (addListener + setState).
 // =============================================================================
 
 class AulaSensoresHardwarePage extends StatefulWidget {
   const AulaSensoresHardwarePage({super.key});
 
   @override
-  State<AulaSensoresHardwarePage> createState() => _AulaSensoresHardwarePageState();
+  State<AulaSensoresHardwarePage> createState() =>
+      _AulaSensoresHardwarePageState();
 }
 
 class _AulaSensoresHardwarePageState extends State<AulaSensoresHardwarePage> {
-  final AulaSensoresHardwareViewModel _viewModel = AulaSensoresHardwareViewModel();
+  final AulaSensoresHardwareViewModel _viewModel =
+      AulaSensoresHardwareViewModel();
 
   @override
   void initState() {
     super.initState();
-    // TODO: manter este padrão MVVM da disciplina:
-    // _viewModel.addListener(_onViewModelChanged);
     _viewModel.addListener(_onViewModelChanged);
   }
 
   @override
   void dispose() {
-    // TODO: remover listener para evitar memory leak.
     _viewModel.removeListener(_onViewModelChanged);
     _viewModel.dispose();
     super.dispose();
@@ -39,6 +38,7 @@ class _AulaSensoresHardwarePageState extends State<AulaSensoresHardwarePage> {
 
   @override
   Widget build(BuildContext context) {
+    final vm = _viewModel;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Aula 1.4 — Sensores de hardware'),
@@ -56,16 +56,15 @@ class _AulaSensoresHardwarePageState extends State<AulaSensoresHardwarePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Acelerômetro (x, y, z)',
+                      'Acelerômetro (x, y, z) — m/s²',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                     ),
                     const SizedBox(height: 8),
-                    // TODO: alunos podem melhorar a formatação com toStringAsFixed(2).
-                    Text('x: ${_viewModel.ax}'),
-                    Text('y: ${_viewModel.ay}'),
-                    Text('z: ${_viewModel.az}'),
+                    Text('x: ${vm.ax.toStringAsFixed(2)}'),
+                    Text('y: ${vm.ay.toStringAsFixed(2)}'),
+                    Text('z: ${vm.az.toStringAsFixed(2)}'),
                   ],
                 ),
               ),
@@ -78,16 +77,15 @@ class _AulaSensoresHardwarePageState extends State<AulaSensoresHardwarePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Giroscópio (x, y, z)',
+                      'Giroscópio (x, y, z) — rad/s',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                     ),
                     const SizedBox(height: 8),
-                    // TODO: alunos podem melhorar a formatação com toStringAsFixed(2).
-                    Text('x: ${_viewModel.gx}'),
-                    Text('y: ${_viewModel.gy}'),
-                    Text('z: ${_viewModel.gz}'),
+                    Text('x: ${vm.gx.toStringAsFixed(2)}'),
+                    Text('y: ${vm.gy.toStringAsFixed(2)}'),
+                    Text('z: ${vm.gz.toStringAsFixed(2)}'),
                   ],
                 ),
               ),
@@ -106,17 +104,23 @@ class _AulaSensoresHardwarePageState extends State<AulaSensoresHardwarePage> {
                           ),
                     ),
                     const SizedBox(height: 8),
-                    Text('Latitude: ${_viewModel.latitude?.toStringAsFixed(6) ?? '--'}'),
-                    Text('Longitude: ${_viewModel.longitude?.toStringAsFixed(6) ?? '--'}'),
-                    Text('Precisão: ${_viewModel.precisao?.toStringAsFixed(2) ?? '--'} m'),
+                    Text(
+                      'Latitude: ${vm.latitude?.toStringAsFixed(6) ?? '--'}',
+                    ),
+                    Text(
+                      'Longitude: ${vm.longitude?.toStringAsFixed(6) ?? '--'}',
+                    ),
+                    Text(
+                      'Precisão: ${vm.precisao?.toStringAsFixed(2) ?? '--'} m',
+                    ),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 12),
-            if (_viewModel.mensagemErro != null)
+            if (vm.mensagemErro != null)
               Text(
-                _viewModel.mensagemErro!,
+                vm.mensagemErro!,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Colors.red.shade700,
                     ),
@@ -127,34 +131,31 @@ class _AulaSensoresHardwarePageState extends State<AulaSensoresHardwarePage> {
               runSpacing: 8,
               children: [
                 ElevatedButton.icon(
-                  // TODO: ligar botão com iniciarMonitoramentoSensores().
-                  onPressed: _viewModel.sensoresAtivos
+                  onPressed: vm.sensoresAtivos
                       ? null
-                      : () => _viewModel.iniciarMonitoramentoSensores(),
+                      : () => vm.iniciarMonitoramentoSensores(),
                   icon: const Icon(Icons.play_arrow),
                   label: const Text('Iniciar sensores'),
                 ),
                 ElevatedButton.icon(
-                  // TODO: ligar botão com pararMonitoramentoSensores().
-                  onPressed: _viewModel.sensoresAtivos
-                      ? () => _viewModel.pararMonitoramentoSensores()
+                  onPressed: vm.sensoresAtivos
+                      ? () => vm.pararMonitoramentoSensores()
                       : null,
                   icon: const Icon(Icons.stop),
                   label: const Text('Parar sensores'),
                 ),
                 ElevatedButton.icon(
-                  // TODO: ligar botão com obterLocalizacaoAtual() e tratar loading.
-                  onPressed: _viewModel.gpsLoading
+                  onPressed: vm.gpsLoading
                       ? null
-                      : () => _viewModel.obterLocalizacaoAtual(),
-                  icon: _viewModel.gpsLoading
+                      : () => vm.obterLocalizacaoAtual(),
+                  icon: vm.gpsLoading
                       ? const SizedBox(
                           width: 16,
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.my_location),
-                  label: Text(_viewModel.gpsLoading ? 'Lendo GPS...' : 'Ler GPS agora'),
+                  label: Text(vm.gpsLoading ? 'Lendo GPS...' : 'Ler GPS agora'),
                 ),
               ],
             ),
@@ -164,4 +165,3 @@ class _AulaSensoresHardwarePageState extends State<AulaSensoresHardwarePage> {
     );
   }
 }
-

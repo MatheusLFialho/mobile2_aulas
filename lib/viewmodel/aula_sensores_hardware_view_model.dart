@@ -1,16 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-// TODO: ao implementar obterLocalizacaoAtual() com Geolocator, adicione:
-// import 'package:geolocator/geolocator.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
 // =============================================================================
-// AULA 1.4 — SENSORES DE HARDWARE (MVVM) — VERSÃO EXERCÍCIO
+// AULA 1.4 — SENSORES DE HARDWARE (MVVM)
 // =============================================================================
-// Esta aula compara sensores contínuos (acelerômetro/giroscópio) com GPS
-// (leitura sob demanda). O esqueleto está pronto e as partes importantes
-// ficaram marcadas com TODO para os alunos implementarem.
+// Acelerômetro e giroscópio em tempo real (streams) e GPS sob demanda
+// (Geolocator). Em muitos navegadores os sensores de movimento não estão
+// disponíveis no Flutter Web — use dispositivo/emulador Android para testar.
 // =============================================================================
 
 class AulaSensoresHardwareViewModel extends ChangeNotifier {
@@ -35,23 +34,51 @@ class AulaSensoresHardwareViewModel extends ChangeNotifier {
   StreamSubscription<GyroscopeEvent>? _gyrSub;
 
   Future<void> iniciarMonitoramentoSensores() async {
-    // TODO: assinar userAccelerometerEventStream e gyroscopeEventStream.
-    // Dicas:
-    // 1) Guardar cada StreamSubscription em _accSub e _gyrSub.
-    // 2) Atualizar ax/ay/az e gx/gy/gz dentro dos listeners.
-    // 3) Chamar notifyListeners() quando atualizar leituras.
-    // 4) Lidar com múltiplos cliques (evitar dupla assinatura).
-    sensoresAtivos = true;
-    mensagemErro = 'TODO: implementar iniciarMonitoramentoSensores()';
+    await _accSub?.cancel();
+    await _gyrSub?.cancel();
+    _accSub = null;
+    _gyrSub = null;
+
+    try {
+      _accSub = userAccelerometerEventStream().listen(
+        (UserAccelerometerEvent e) {
+          ax = e.x;
+          ay = e.y;
+          az = e.z;
+          notifyListeners();
+        },
+        onError: (Object e) {
+          mensagemErro = 'Acelerômetro: $e';
+          notifyListeners();
+        },
+      );
+      _gyrSub = gyroscopeEventStream().listen(
+        (GyroscopeEvent e) {
+          gx = e.x;
+          gy = e.y;
+          gz = e.z;
+          notifyListeners();
+        },
+        onError: (Object e) {
+          mensagemErro = 'Giroscópio: $e';
+          notifyListeners();
+        },
+      );
+      sensoresAtivos = true;
+      mensagemErro = null;
+    } catch (e) {
+      sensoresAtivos = false;
+      mensagemErro =
+          'Não foi possível iniciar os sensores (Web/emulador pode não suportar): $e';
+    }
     notifyListeners();
   }
 
   Future<void> pararMonitoramentoSensores() async {
-    // TODO: cancelar _accSub e _gyrSub de forma segura.
-    // Dicas:
-    // 1) await _accSub?.cancel(); await _gyrSub?.cancel();
-    // 2) Limpar referências das subscriptions (setar null).
-    // 3) Atualizar sensoresAtivos e notifyListeners().
+    await _accSub?.cancel();
+    await _gyrSub?.cancel();
+    _accSub = null;
+    _gyrSub = null;
     sensoresAtivos = false;
     notifyListeners();
   }
@@ -61,14 +88,39 @@ class AulaSensoresHardwareViewModel extends ChangeNotifier {
     mensagemErro = null;
     notifyListeners();
 
-    // TODO: implementar fluxo completo de GPS usando Geolocator.
-    // Dicas:
-    // 1) Verificar serviço ativo: Geolocator.isLocationServiceEnabled().
-    // 2) Verificar/solicitar permissão com checkPermission/requestPermission.
-    // 3) Chamar Geolocator.getCurrentPosition() se permitido.
-    // 4) Atualizar latitude/longitude/precisao e notifyListeners().
-    // 5) Em erro, preencher mensagemErro.
-    mensagemErro = 'TODO: implementar obterLocalizacaoAtual()';
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        mensagemErro = 'Serviço de localização desligado';
+        gpsLoading = false;
+        notifyListeners();
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.deniedForever) {
+        mensagemErro = 'Permissão de localização negada permanentemente';
+        gpsLoading = false;
+        notifyListeners();
+        return;
+      }
+      if (permission == LocationPermission.denied) {
+        mensagemErro = 'Permissão de localização negada';
+        gpsLoading = false;
+        notifyListeners();
+        return;
+      }
+
+      final position = await Geolocator.getCurrentPosition();
+      latitude = position.latitude;
+      longitude = position.longitude;
+      precisao = position.accuracy;
+    } catch (e) {
+      mensagemErro = 'Erro ao obter GPS: $e';
+    }
 
     gpsLoading = false;
     notifyListeners();
@@ -76,13 +128,8 @@ class AulaSensoresHardwareViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
-    // TODO: garantir limpeza de recursos chamando pararMonitoramentoSensores()
-    // antes de super.dispose(). Como dispose() não é async, os alunos podem:
-    // - cancelar sem await (chamada direta em cada sub), ou
-    // - criar método sync auxiliar para cancelar.
     _accSub?.cancel();
     _gyrSub?.cancel();
     super.dispose();
   }
 }
-
