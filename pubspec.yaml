@@ -41,6 +41,8 @@ dependencies:
   latlong2: ^0.9.0
   # Chamada à API OSRM para obter geometria da rota entre dois pontos
   http: ^1.2.0
+  # Sensores de hardware (acelerômetro e giroscópio)
+  sensors_plus: ^6.1.1
 
 dev_dependencies:
   flutter_test:
