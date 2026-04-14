@@ -43,6 +43,8 @@ dependencies:
   http: ^1.2.0
   # Sensores de hardware (acelerômetro e giroscópio)
   sensors_plus: ^6.1.1
+  # Notificações locais (e suporte didático ao fluxo de push)
+  flutter_local_notifications: ^21.0.0
 
 dev_dependencies:
   flutter_test:

@@ -7,6 +7,7 @@ import 'aula_acessibilidade_page.dart';
 import 'aula_entrada_permissoes_page.dart';
 import 'aula_mapas_geolocalizacao_page.dart';
 import 'aula_sensores_hardware_page.dart';
+import 'aula_notificacoes_page.dart';
 
 // =============================================================================
 // MENU DE AULAS — View (MVVM)
@@ -113,6 +114,19 @@ class MenuPage extends StatelessWidget {
               context,
               const AulaSensoresHardwarePage(),
               'Sensores de hardware',
+            ),
+          ),
+          const Divider(),
+          ListTile(
+            title: const Text('Aula — Notificacoes locais e push'),
+            subtitle: const Text('Exemplo simples com local + push simulado'),
+            leading: const CircleAvatar(
+              child: Icon(Icons.notifications_active),
+            ),
+            onTap: () => _abrirAula(
+              context,
+              const AulaNotificacoesPage(),
+              'Notificacoes locais e push',
             ),
           ),
         ],

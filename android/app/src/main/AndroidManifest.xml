@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Android 13+: permissao para exibir notificacoes -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Localização (GPS) — necessário para Geolocator no Android -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
